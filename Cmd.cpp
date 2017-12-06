@@ -60,6 +60,7 @@ const char cmd_prompt[] PROGMEM = "CMD >> ";
 const char cmd_unrecog[] PROGMEM = "CMD: Command not recognized.";
 
 static Stream* stream;
+static bool display = 1; // enable display by default
 
 /**************************************************************************/
 /*!
@@ -68,15 +69,17 @@ static Stream* stream;
 /**************************************************************************/
 void cmd_display()
 {
-    char buf[50];
+    if (display) {
+        char buf[50];
 
-    stream->println();
+        stream->println();
 
-    strcpy_P(buf, cmd_banner);
-    stream->println(buf);
+        strcpy_P(buf, cmd_banner);
+        stream->println(buf);
 
-    strcpy_P(buf, cmd_prompt);
-    stream->print(buf);
+        strcpy_P(buf, cmd_prompt);
+        stream->print(buf);
+    }
 }
 
 /**************************************************************************/
@@ -119,10 +122,12 @@ void cmd_parse(char *cmd)
     }
 
     // command not recognized. print message and re-generate prompt.
-    strcpy_P(buf, cmd_unrecog);
-    stream->println(buf);
+    if (display) {
+        strcpy_P(buf, cmd_unrecog);
+        stream->println(buf);
 
-    cmd_display();
+        cmd_display();
+    }
 }
 
 /**************************************************************************/
@@ -143,7 +148,9 @@ void cmd_handler()
         // terminate the msg and reset the msg ptr. then send
         // it to the handler for processing.
         *msg_ptr = '\0';
-        stream->print("\r\n");
+        if (display) {
+            stream->print("\r\n");
+        }
         cmd_parse((char *)msg);
         msg_ptr = msg;
         break;
@@ -155,7 +162,9 @@ void cmd_handler()
 
     case '\b':
         // backspace
-        stream->print(c);
+        if (display) {
+            stream->print(c);
+        }
         if (msg_ptr > msg)
         {
             msg_ptr--;
@@ -164,10 +173,21 @@ void cmd_handler()
 
     default:
         // normal character entered. add it to the buffer
-        stream->print(c);
+        if (display) {
+            stream->print(c);
+        }
         *msg_ptr++ = c;
         break;
     }
+}
+
+/**************************************************************************/
+/*!
+    Enable/disable dispay feedback
+*/
+/**************************************************************************/
+void cmdDisplay(bool enable) {
+    display = enable;
 }
 
 /**************************************************************************/

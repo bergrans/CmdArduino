@@ -57,5 +57,6 @@ void cmdPoll();
 void cmdAdd(const char *name, void (*func)(int argc, char **argv));
 Stream* cmdGetStream(void);
 uint32_t cmdStr2Num(char *str, uint8_t base);
+void cmdDisplay(bool enable);
 
 #endif //CMD_H
